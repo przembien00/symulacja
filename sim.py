@@ -8,25 +8,37 @@ import random
 class Pacjent():
     """Klasa reprezentująca pacjenta, może być zdrowy, chory, lub nosicielem, ma swoje współrzędne x,y"""
     
-    def __init__(self,czy_zdrowy=True,x=0,y=0):
+    def __init__(self,czy_zdrowy=True,x=0,y=0,vx=0,vy=0):
         if czy_zdrowy:
             self.status = 'zdrowy'
         else:
             self.status = 'chory'
         self.x = x
         self.y = y
-    def ruch(self):
-        """Metoda losowo zmieniająca położenie pacjenta w zależnosci od statusu"""
+        self.predkosc_x = vx
+        self.predkosc_y = vy
         
-        if self.status != 'chory':
-            zasieg = 1
-        else:
+    def ruch(self):
+        """Metoda losowo zmieniająca prędkosć i położenie pacjenta w zależnosci od statusu"""
+        
+        if self.status == 'chory':
             zasieg = 0.1
-            
-        self.x = self.x + random.uniform(-zasieg,zasieg)
-        self.y = self.y + random.uniform(-zasieg,zasieg)
+            predkosc_maksymalna = 1
+        else:
+            zasieg = 1
+            predkosc_maksymalna = 4
+        self.predkosc_x = self.predkosc_x + random.uniform(-zasieg,zasieg)
+        self.predkosc_y = self.predkosc_y + random.uniform(-zasieg,zasieg)
+        if self.predkosc_x > predkosc_maksymalna:
+            self.predkosc_x = predkosc_maksymalna
+        if self.predkosc_y > predkosc_maksymalna:
+            self.predkosc_y = predkosc_maksymalna
+        self.x = self.x + self.predkosc_x
+        self.y = self.y + self.predkosc_y
+    
     def __str__(self):
         return "Pacjent     " + self.status + " @ " + str(self.x) + " x " + str(self.y)
+
 class Populacja():
     """Klasa reprezentująca populację n ludzi na obszarze wysokosc x szerokosc"""
     
@@ -144,6 +156,6 @@ class Populacja():
             lines[5].set_data(x,nosicieledata)
             return lines
         ani = FuncAnimation(fig, update, frames=None, init_func=init, blit=True)       
-pop = Populacja(100,100,100)
+pop = Populacja(50,100,100)
 pop.animuj()
 pt.show(block=True)
