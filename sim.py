@@ -40,11 +40,43 @@ class Populacja():
             x = random.uniform(0,szerokosc)
             y = random.uniform(0,wysokosc)
             self._pacjenci.append(Pacjent(zdrowy,x,y))
+            
     def __str__(self):
         s = ""
         for p in self._pacjenci:
             s += str(p) + "\n"
         return s
+    
+    @property
+    def wysokosc(self):
+        return self._wysokosc
+    
+    @property
+    def szerokosc(self):
+        return self._szerokosc
+    
+    @wysokosc.setter
+    def wysokosc(self,y):
+        if y<0:
+            return ValueError
+        else:
+            if y < self._wysokosc:
+                for p in self._pacjenci:
+                    if p.y > y:
+                        p.y = y
+            self._wysokosc = y
+    
+    @szerokosc.setter
+    def wysokosc(self,x):
+        if x<0:
+            return ValueError
+        else:
+            if x < self._szerokosc:
+                for p in self._pacjenci:
+                    if p.x > x:
+                        p.x = x
+            self._szerokosc = x
+    
     
     def ruch(self):
         """Metoda losowo zmieniająca położenie wszystkich ludzi w populacji"""
@@ -66,6 +98,7 @@ class Populacja():
                         break
                 if czy_blisko == True:
                     p.status = random.choice(['chory','nosiciel'])
+                    
     def rysuj(self):
         """Metoda rysuje położenie ludzi na planszy"""
         fig, ax = pt.subplots()
