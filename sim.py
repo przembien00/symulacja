@@ -8,13 +8,15 @@ import random
 class Pacjent():
     """Klasa reprezentująca pacjenta, może być zdrowy, chory, lub nosicielem, ma swoje współrzędne x,y"""
     
-    def __init__(self,czy_zdrowy=True,x=0,y=0):
+    def __init__(self,czy_zdrowy=True,x=0,y=0,vx=0,vy=0):
         if czy_zdrowy:
             self.status = 'zdrowy'
         else:
             self.status = 'chory'
         self.x = x
         self.y = y
+        self.predkosc_x = vx
+        self.predkosc_y = vy
         if self.status == 'chory':
             self.t = random.randrange(0,50,1)
         elif self.status == 'nosiciel':
@@ -26,21 +28,34 @@ class Pacjent():
         
         if self.status == 'chory':
             zasieg = 0.1
+            predkosc_maksymalna = 0.1
         elif self.status == 'zmarly':
             zasieg = 0
+            predkosc_maksymalna = 0
         else:
             zasieg = 1
+            predkosc_maksymalna = 1
         
         self.t+=1
         
         if self.t == 100:
-            if random.uniform(0,1)<0.04:
+            if self.status == 'nosiciel':
+                self.status = 'odporny'
+            elif random.uniform(0,1)<0.04:
                 self.status = 'zmarly'
             else:
                 self.status = 'odporny'
         
-        self.x = self.x + random.uniform(-zasieg,zasieg)
-        self.y = self.y + random.uniform(-zasieg,zasieg)
+        self.predkosc_x = self.predkosc_x + random.uniform(-zasieg,zasieg)
+        self.predkosc_y = self.predkosc_y + random.uniform(-zasieg,zasieg)
+        if self.predkosc_x > predkosc_maksymalna:
+            self.predkosc_x = predkosc_maksymalna
+        if self.predkosc_y > predkosc_maksymalna:
+            self.predkosc_y = predkosc_maksymalna   
+        self.x = self.x + self.predkosc_x
+        self.y = self.y + self.predkosc_y
+        
+        
     def __str__(self):
         return "Pacjent     " + self.status + " @ " + str(self.x) + " x " + str(self.y)
 class Populacja():
@@ -62,6 +77,37 @@ class Populacja():
             s += str(p) + "\n"
         return s
     
+    @property
+    def wysokosc(self):
+        return self._wysokosc
+    
+    @property
+    def szerokosc(self):
+        return self._szerokosc
+    
+    @wysokosc.setter
+    def wysokosc(self,y):
+        if y<0:
+            return ValueError
+        else:
+            if y < self._wysokosc:
+                for p in self._pacjenci:
+                    if p.y > y:
+                        p.y = y
+            self._wysokosc = y
+    
+    @szerokosc.setter
+    def wysokosc(self,x):
+        if x<0:
+            return ValueError
+        else:
+            if x < self._szerokosc:
+                for p in self._pacjenci:
+                    if p.x > x:
+                        p.x = x
+            self._szerokosc = x
+            
+        
     def ruch(self):
         """Metoda losowo zmieniająca położenie wszystkich ludzi w populacji"""
         for p in self._pacjenci:
