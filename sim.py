@@ -13,14 +13,18 @@ class Pacjent():
             self.status = 'zdrowy'
         else:
             self.status = 'chory'
+        if self.status!= 'zdrowy' and self.status!='chory' and self.status!='nosiciel' and self.status!='zmarly' and  self.status!='odporny':
+            raise ValueError
         self.x = x
         self.y = y
         self.predkosc_x = vx
         self.predkosc_y = vy
+        self.zakx = -1
+        self.zaky = -1
         if self.status == 'chory':
-            self.t = random.randrange(0,50,1)
+            self.t = 1
         elif self.status == 'nosiciel':
-            self.t = random.randrange(0,50,1)
+            self.t = 1
         else:
             self.t = 101
     def ruch(self):
@@ -50,8 +54,12 @@ class Pacjent():
         self.predkosc_y = self.predkosc_y + random.uniform(-zasieg,zasieg)
         if self.predkosc_x > predkosc_maksymalna:
             self.predkosc_x = predkosc_maksymalna
+        if self.predkosc_x < -predkosc_maksymalna:
+            self.predkosc_x = -predkosc_maksymalna
         if self.predkosc_y > predkosc_maksymalna:
             self.predkosc_y = predkosc_maksymalna   
+        if self.predkosc_y < -predkosc_maksymalna:
+            self.predkosc_y = -predkosc_maksymalna
         self.x = self.x + self.predkosc_x
         self.y = self.y + self.predkosc_y
         
@@ -129,6 +137,17 @@ class Populacja():
                 if czy_blisko == True:
                     p.status = random.choice(['chory','nosiciel'])
                     p.t = 0
+                    p.zakx = p.x
+                    p.zaky = p.y
+                    
+    def historia_zarazen(self):
+        """Metoda wypisauje miejsca i czas zarażeń"""
+        lista = []
+        for p in self._pacjenci:
+            if p.zakx != -1:
+                lista.append([p.zakx, p.zaky, p.t])
+        return(lista)
+    
     def rysuj(self):
         """Metoda rysuje położenie ludzi na planszy"""
         fig, ax = pt.subplots()
@@ -206,8 +225,15 @@ class Populacja():
             ax[2].pie(dane, labels = oznaczenia, colors = kolory, autopct='%1.0f%%', labeldistance=50)
             ax[2].legend()
             ax[2].axis('equal')
-            return lines + [ax[2]]
-        ani = FuncAnimation(fig, update, frames=None, init_func=init, blit=True)       
+            xzar = []
+            yzar = []
+            tzar = []
+            for zar in self.historia_zarazen():
+                xzar.append(zar[0])
+                yzar.append(zar[1])
+                tzar.append(5000/(zar[2]**2 + 10))
+            return lines + [ax[2], ax[0].scatter(xzar, yzar, c = 'cyan', s = tzar)]
+        ani = FuncAnimation(fig, update, frames=None, init_func=init, blit=True) 
 pop = Populacja(100,100,100)
 pop.animuj()
 pt.show(block=True)
